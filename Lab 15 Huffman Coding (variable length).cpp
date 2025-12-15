@@ -1,54 +1,64 @@
-#include <iostream>
+#include <bits/stdc++.h>
 using namespace std;
 
-int main() {
-    int n;
-    cout << "Enter number of characters: ";
-    cin >> n;
+int main(){
 
-    char ch[100];
-    int freq[100];
-    string code[100];
-    cout << "Enter characters:\n";
-    for(int i=0;i<n;i++) cin >> ch[i];
+    string text;
+    cout << "Enter text: ";
+    cin >> text;
 
-    cout << "Enter frequencies:\n";
-    for(int i=0;i<n;i++) {
-        cin >> freq[i];
-        code[i] = "";
+    map<char, int> freq;
+    for(char c : text) freq[c]++;
+
+    cout << "\nFrequencies : " << endl;
+    for (auto it : freq) {
+        cout << it.first << " : " << it.second << endl;
+    }
+    cout << endl;
+
+    priority_queue<pair<int,string>,
+        vector<pair<int,string>>,
+        greater<pair<int,string>>> pq;
+
+    for(auto it : freq){
+        pq.push({it.second, string(1, it.first)});
     }
 
-    while(true) {
-        int min1 = -1, min2 = -1;
-        int active = 0;
-        for(int i=0;i<n;i++)
-            if(freq[i] != -1) active++;
+    map<char,string> code;
 
-        if(active == 1) break;
+    while(pq.size() > 1) {
+        auto left = pq.top(); pq.pop();
+        auto right = pq.top(); pq.pop();
 
-        for(int i=0;i<n;i++) {
-            if(freq[i] != -1) {
-                if(min1 == -1 || freq[i] < freq[min1]) {
-                    min2 = min1;
-                    min1 = i;
-                }
-                else if(min2 == -1 || freq[i] < freq[min2]) {
-                    min2 = i;
-                }
-            }
-        }
-        code[min1] = "0" + code[min1];
-        code[min2] = "1" + code[min2];
+        for(char c : left.second)
+            code[c] = "0" + code[c];
 
-        freq[min1] = freq[min1] + freq[min2];
-        freq[min2] = -1;
+        for(char c : right.second)
+            code[c] = "1" + code[c];
+
+        pq.push({left.first + right.first,
+                 left.second + right.second});
     }
 
-    cout << "\nHuffman Codes:\n";
-    for(int i=0;i<n;i++) {
-        cout << ch[i] << " : " << code[i] << endl;
+    cout << "Huffman Codes : " << endl;
+    for (auto it : freq) {
+        cout << it.first << " : " << code[it.first] << endl;
     }
+    cout << endl;
+
+    int original = text.length() * 8;
+    int compressed = 0;
+    int table_bits = 0;
+
+    for(auto it : freq) {
+        compressed += it.second * code[it.first].length();
+        table_bits += 8 + code[it.first].length();
+    }
+
+    cout << "Original Length : " << original << endl;
+    cout << "Compressed msg length : " << compressed << endl;
+    cout << "Table : " << table_bits << endl;
+    cout << "New length : " << compressed + table_bits << endl;
 
     return 0;
 }
-
